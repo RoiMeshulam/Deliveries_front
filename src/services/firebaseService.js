@@ -35,7 +35,7 @@ export const signInWithEmail = async (email, password, setIsConnected, setUserIn
       showCustomAlert("התחברת בהצלחה", `ברוך הבא! ${name}`, "success");
   
       // Navigate to the correct screen
-    //   navigation.replace(role === "admin" ? 'AdminDashboard' : 'UserDashboard');
+      navigation.replace(role === "admin" ? 'AdminDashboard' : 'UserDashboard');
   
     } catch (error) {
       console.error("❌ Login Error:", error);

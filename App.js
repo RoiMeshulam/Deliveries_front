@@ -6,8 +6,7 @@ import {
   onBackgroundMessageListener,
   onNotificationOpenedListener
 } from './src/services/firebaseService';
-import LoginScreen from './src/screens/LoginScreen';
-import { GlobalStateProvider } from './src/contexts/GlobalStateContext';
+import AppNavigator from './src/navigation/AppNavigator';
 
 const App = () => {
   useEffect(() => {
@@ -18,9 +17,7 @@ const App = () => {
   }, []);
 
   return (
-    <GlobalStateProvider>  
-    <LoginScreen />
-  </GlobalStateProvider>
+   <AppNavigator />
   );
 };
 
