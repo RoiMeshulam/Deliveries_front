@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Text } from "react-native";
-import { SafeAreaView } from 'react-native-safe-area-context'; 
+import { View, StyleSheet, Text, Platform } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Header = (props) => {
     const [currentTime, setCurrentTime] = useState("");
 
-    // Update time every second
     useEffect(() => {
         const timer = setInterval(() => {
             const now = new Date();
@@ -15,26 +14,29 @@ const Header = (props) => {
     
         return () => clearInterval(timer); // Cleanup interval on unmount
     }, []);
-    
 
     return (
+        <SafeAreaView edges={["top"]} style={styles.safeArea}>
             <View style={styles.container}>
                 <Text style={styles.clock}>{currentTime}</Text>
                 <Text style={styles.title}>{props.title}</Text>
-            </View>      
+            </View>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    
+    safeArea: {
+        backgroundColor: "#fff",
+        paddingTop: Platform.OS === "android" ? 25 : 0, // Add top padding for Android status bar
+        paddingBottom: 10,
+    },
     container: {
-        backgroundColor: "#fff", // Header background color
         alignItems: "center", // Center items horizontally
         justifyContent: "center", // Center items vertically
         borderBottomWidth: 1, // Optional border for separation
         borderBottomColor: "#ccc",
-        paddingVertical: 10, // Adds vertical padding
-        // paddingTop: 70
+        // paddingVertical: 10, // Adds vertical padding
     },
     clock: {
         fontSize: 32,

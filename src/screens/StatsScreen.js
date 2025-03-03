@@ -7,7 +7,8 @@ import {
   StyleSheet,
   Platform,
   FlatList,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  ScrollView
 } from 'react-native';
 import { GlobalStateContext } from '../contexts/GlobalStateContext';
 import AddUser from '../components/AddUser';
@@ -65,34 +66,28 @@ export default function StatsScreen() {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-      <FlatList
-        data={[{ key: 'users' }, { key: 'addUserButton' }, { key: 'businesses' }]}
-        keyExtractor={(item) => item.key}
-        renderItem={({ item }) => {
-          if (item.key === 'users') {
-            return <UsersList users={users} />;
-          } else if (item.key === 'addUserButton') {
-            return (
-              <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-                <Text style={styles.addButtonText}>הוספת שליח חדש +</Text>
-              </TouchableOpacity>
-            );
-          } else if (item.key === 'businesses') {
-            return <DisplayBusinessesList businesses={businesses} />;
-          }
-          return null;
-        }}
-        ListFooterComponent={
-          <CustomAlert
-            visible={alertVisible}
-            title={alertData.title}
-            message={alertData.message}
-            onClose={() => setAlertVisible(false)}
-            type={alertData.type}
-          />
-        }
-      />
       
+      <View contentContainerStyle={styles.scrollContainer}>
+        {/* ✅ Set a max height for the UsersList */}
+        <View style={styles.usersListContainer}>
+          <UsersList users={users} />
+        </View>
+
+        <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+          <Text style={styles.addButtonText}>הוספת שליח חדש +</Text>
+        </TouchableOpacity>
+
+        <DisplayBusinessesList businesses={businesses} />
+
+        <CustomAlert
+          visible={alertVisible}
+          title={alertData.title}
+          message={alertData.message}
+          onClose={() => setAlertVisible(false)}
+          type={alertData.type}
+        />
+      </View>
+
       <AddUser
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
@@ -105,7 +100,30 @@ export default function StatsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: '5%', backgroundColor: "#f9f9f9" },
-  addButton: { backgroundColor: "#003285", padding: 10, borderRadius: 8, marginTop: 10, alignItems: "center" },
-  addButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  container: { 
+    flex: 1, 
+    paddingHorizontal: '5%', 
+    backgroundColor: "#f9f9f9" 
+  },
+  scrollContainer: {
+    flexGrow: 1, 
+    paddingBottom: 20 
+  },
+  usersListContainer: {
+    maxHeight: 270, // ✅ Sets max height for scrolling users list
+    overflow: "hidden", // Prevents extra space from appearing
+  },
+  addButton: { 
+    backgroundColor: "#003285", 
+    padding: 10, 
+    borderRadius: 8, 
+    marginTop: 10, 
+    alignItems: "center" 
+  },
+  addButtonText: { 
+    color: "#fff", 
+    fontSize: 16, 
+    fontWeight: "bold" 
+  },
 });
+
