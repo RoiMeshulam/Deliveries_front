@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "690991638006",
+    "firebase_url": "https://moneymonitor-d37db-default-rtdb.firebaseio.com",
+    "project_id": "moneymonitor-d37db",
+    "storage_bucket": "moneymonitor-d37db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690991638006:android:1780694d7b2936c2b553d7",
+        "android_client_info": {
+          "package_name": "com.deliveries.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbAv3AW-8d2DapxNQyb2ZrBhMIOVRLhu8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690991638006:android:1429be7cf7b5a7f1b553d7",
+        "android_client_info": {
+          "package_name": "com.myfirebaseapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbAv3AW-8d2DapxNQyb2ZrBhMIOVRLhu8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

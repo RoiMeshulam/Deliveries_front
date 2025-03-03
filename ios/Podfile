@@ -5,31 +5,48 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, min_ios_version_supported
+platform :ios, min_ios_version_supported  # Ensure iOS 14+ is set
 prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
   use_frameworks! :linkage => linkage.to_sym
+else
+  use_frameworks! :linkage => :static
 end
 
 target 'MyFirebaseApp' do
   config = use_native_modules!
 
+  # ✅ REMOVE Firebase Dependencies from CocoaPods since you are using SPM
+  # pod 'Firebase/App'
+  # pod 'Firebase/Messaging'
+  # pod 'Firebase/Auth'
+  # pod 'GoogleUtilities'
+  # pod 'FirebaseCoreInternal'
+
+  # ✅ Ensure React Native is properly linked
   use_react_native!(
     :path => config[:reactNativePath],
-    # An absolute path to your application root.
+    :hermes_enabled => true,  # ✅ Ensure Hermes is enabled
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
   post_install do |installer|
-    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
       installer,
       config[:reactNativePath],
-      :mac_catalyst_enabled => false,
-      # :ccache_enabled => true
+      :mac_catalyst_enabled => false
     )
+
+    # ✅ Ensure Hermes is properly linked
+    installer.pods_project.targets.each do |target|
+      if target.name == 'React-RuntimeHermes'
+        target.build_configurations.each do |config|
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+        end
+      end
+    end
   end
 end
