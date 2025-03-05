@@ -7,7 +7,7 @@ import { signInWithEmail } from '../services/firebaseService'; // ✅ Import Fir
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { setIsConnected, setUserInfo } = useContext(GlobalStateContext);
+  const { setIsConnected, setUserInfo, socket } = useContext(GlobalStateContext);
 
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertData, setAlertData] = useState({ title: "", message: "", type: "" });
@@ -46,7 +46,7 @@ export default function LoginScreen({ navigation }) {
         />
 
         <View style={styles.btn}>
-          <Button title="Login" color="#008DDA" onPress={() => signInWithEmail(email, password, setIsConnected, setUserInfo, navigation, showCustomAlert)} />
+          <Button title="Login" color="#008DDA" onPress={() => signInWithEmail(email, password, setIsConnected, setUserInfo, navigation, showCustomAlert, socket)} />
         </View>
       </View>
 

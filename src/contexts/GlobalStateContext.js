@@ -6,8 +6,7 @@ import { io } from "socket.io-client";
 
 
 // Define socket server URL using the env variables
-const SOCKET_SERVER_URL = 
-Platform.OS === 'android' ? 'http://10.0.2.2:8080' : 'http://localhost:8080';
+const SOCKET_SERVER_URL =  Platform.OS === 'android' ? 'http://10.0.2.2:8080' : 'http://localhost:8080';
 
 
 console.log(SOCKET_SERVER_URL);
@@ -28,48 +27,60 @@ export const GlobalStateProvider = ({ children }) => {
 
   // WebSocket connection
   useEffect(() => {
-    if (isConnected && userInfo.uid) {
-      console.log("🔌 Connecting to WebSocket...");
-
-      const newSocket = io(SOCKET_SERVER_URL, {
-        transports: ["websocket"],
-        reconnection: true,
-        query: { userId: userInfo.uid },
+    if (!isConnected || !userInfo.uid) return;
+  
+    console.log("🔌 Connecting to WebSocket...");
+  
+    const newSocket = io(SOCKET_SERVER_URL, {
+      transports: ["websocket"],
+      reconnection: true,
+      query: { userId: userInfo.uid },
+    });
+  
+    setSocket(newSocket);
+  
+    newSocket.on("connect", () => {
+      console.log("✅ WebSocket Connected:", newSocket.id);
+    });
+  
+    newSocket.on("disconnect", (reason) => {
+      console.warn("❌ WebSocket Disconnected:", reason);
+      if (reason === "transport close") {
+        console.log("🔄 Attempting to reconnect WebSocket...");
+        setTimeout(() => {
+          setSocket(io(SOCKET_SERVER_URL, { transports: ["websocket"], reconnection: true }));
+        }, 3000);
+      }
+    });
+  
+    // 📦 Listen for delivery updates
+    newSocket.on("updateDeliveries", (update) => {
+      console.log("📡 Received WebSocket Update:", update);
+  
+      setDeliveries((prevDeliveries) => {
+        let updatedDeliveries = [...prevDeliveries];
+  
+        if (update.type === "new") {
+          console.log("➕ Adding new delivery:", update.data);
+          updatedDeliveries = [...updatedDeliveries, update.data];
+        } else if (update.type === "update") {
+          console.log("🔄 Updating delivery:", update.data);
+          updatedDeliveries = updatedDeliveries.map((delivery) =>
+            delivery.id === update.data.id ? update.data : delivery
+          );
+        } else if (update.type === "delete") {
+          console.log("🗑️ Removing deleted delivery:", update.id);
+          updatedDeliveries = updatedDeliveries.filter((delivery) => delivery.id !== update.id);
+        }
+  
+        return [...updatedDeliveries]; // Force React to update state
       });
-
-      setSocket(newSocket);
-
-      newSocket.on("connect", () => {
-        console.log("✅ WebSocket Connected:", newSocket.id);
-      });
-
-      newSocket.on("disconnect", () => {
-        console.log("❌ WebSocket Disconnected");
-      });
-
-      // Listen for real-time delivery updates
-      newSocket.on("updateDeliveries", (update) => {
-        console.log("📦 Delivery update:", update);
-
-        setDeliveries((prevDeliveries) => {
-          if (update.type === "new") {
-            return [...prevDeliveries, update.data]; // Add new delivery
-          } else if (update.type === "update") {
-            return prevDeliveries.map((delivery) =>
-              delivery.id === update.data.id ? update.data : delivery
-            );
-          } else if (update.type === "delete") {
-            return prevDeliveries.filter((delivery) => delivery.id !== update.id);
-          }
-          return prevDeliveries;
-        });
-      });
-
-      return () => {
-        console.log("🔌 Disconnecting WebSocket...");
-        newSocket.disconnect();
-      };
-    }
+    });
+  
+    return () => {
+      console.log("🔌 Disconnecting WebSocket...");
+      newSocket.disconnect();
+    };
   }, [isConnected, userInfo.uid]);
 
   // Get today's date in YYYY/MM/DD format (Israel timezone)
@@ -135,10 +146,12 @@ export const GlobalStateProvider = ({ children }) => {
 
 
 
-  // Fetch all data when user connects
   useEffect(() => {
-    fetchAllData();
+    if (isConnected && userInfo.uid) {
+      fetchAllData();
+    }
   }, [isConnected, userInfo.uid]);
+  
 
   return (
     <GlobalStateContext.Provider

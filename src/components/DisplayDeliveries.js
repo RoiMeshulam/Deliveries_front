@@ -27,7 +27,7 @@ const DisplayDeliveries = ({ deliveries, userInfo }) => {
     
     // for android emulator
     const SOCKET_SERVER_URL =
-    Platform.OS === "android" ? "http://10.0.0.8:8080" : "http://localhost:8080";
+    Platform.OS === "android" ? "http://10.0.2.2:8080" : "http://localhost:8080";
 
 
     // update selected deliveries state

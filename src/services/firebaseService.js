@@ -1,46 +1,56 @@
 import { Platform, Alert, PermissionsAndroid } from 'react-native';
+
 import messaging from '@react-native-firebase/messaging';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
+
 const API_BASE_URL = 
 Platform.OS === 'android' ? 'http://10.0.2.2:8080' : 'http://localhost:8080';
 
 //auth
-export const signInWithEmail = async (email, password, setIsConnected, setUserInfo, navigation, showCustomAlert) => {
+export const signInWithEmail = async (email, password, setIsConnected, setUserInfo, navigation, showCustomAlert, socket) => {
   try {
     if (!email || !password) {
       showCustomAlert('התחברות נכשלה!', 'אנא מלא את כל השדות', "error");
       return;
     }
 
+    console.log("🔑 Signing in user...");
     const userCredential = await auth().signInWithEmailAndPassword(email, password);
     const user = userCredential.user;
     const idToken = await user.getIdToken(); // ✅ Get Firebase token
 
-    // ✅ Request FCM Token
+    console.log("📡 Requesting FCM token...");
     const fcmToken = await requestUserPermission();
 
     // ✅ Send login token + FCM token to backend
     const response = await axios.post(`${API_BASE_URL}/api/users/signin`, { 
       token: idToken, 
-      fcmToken // ✅ Send FCM Token
+      fcmToken: fcmToken || null  // ✅ Send `null` if FCM token is unavailable
     });
 
     const { token, uid, role, name } = response.data;
 
     await AsyncStorage.setItem('token', idToken); // ✅ Store token locally
 
+    console.log(`✅ User logged in: ${name} (${role})`);
     setIsConnected(true);
     setUserInfo({ name, role, uid });
 
     showCustomAlert("התחברת בהצלחה", `ברוך הבא! ${name}`, "success");
 
-    navigation.replace(role === "admin" ? 'AdminDashboard' : 'UserDashboard');
+    // ✅ Ensure WebSocket is initialized before emitting events
+    if (socket) {
+      console.log("🔌 Registering FCM token with WebSocket...");
+      registerFcmTokenWithSocket(uid, fcmToken, socket);
+    } else {
+      console.warn("⚠️ WebSocket not initialized, skipping FCM registration.");
+    }
 
-    // ✅ Register FCM token with WebSocket
-    registerFcmTokenWithSocket(uid, fcmToken);
+    // ✅ Navigate **after** WebSocket registration
+    navigation.replace(role === "admin" ? 'AdminDashboard' : 'UserDashboard');
 
   } catch (error) {
     console.error("❌ Login Error:", error);
@@ -48,16 +58,26 @@ export const signInWithEmail = async (email, password, setIsConnected, setUserIn
   }
 };
 
-// ✅ Function to register FCM token with WebSocket
-export const registerFcmTokenWithSocket = (userId, fcmToken) => {
-  if (!userId || !fcmToken) return;
 
-  const socket = io(SOCKET_SERVER_URL, {
-    transports: ["websocket"],
-    query: { userId },
+export const registerFcmTokenWithSocket = (userId, fcmToken, socket) => {
+  if (!userId || !fcmToken || !socket) {
+    console.warn("⚠️ Missing parameters: Cannot register FCM token.");
+    return;
+  }
+
+  console.log(`📡 Registering FCM token for user ${userId}...`);
+  socket.emit("registerFcmToken", fcmToken, (ack) => {
+    if (ack?.success) {
+      console.log("✅ FCM token registered successfully.");
+    } else {
+      console.error("❌ WebSocket registration failed.");
+    }
   });
 
-  socket.emit("registerFcmToken", fcmToken);
+  // Handle WebSocket disconnects
+  socket.on("disconnect", () => {
+    console.warn("❌ WebSocket disconnected. FCM registration may be lost.");
+  });
 };
 
 /**
