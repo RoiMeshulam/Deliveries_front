@@ -35,7 +35,7 @@ const FilterButtons = ({ filter, handleFilterChange, filterCounts }) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    // marginBottom: 5,
+    marginTop: 10,
   },
   button: {
     flex: 1,

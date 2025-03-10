@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     safeArea: {
         backgroundColor: "#fff",
         paddingTop: Platform.OS === "android" ? 25 : 0, // Add top padding for Android status bar
-        paddingBottom: 10,
+        // paddingBottom: 10,
     },
     container: {
         alignItems: "center", // Center items horizontally

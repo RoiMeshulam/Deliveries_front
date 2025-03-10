@@ -44,7 +44,7 @@ const DeliveryDetails = ({ businessDetails, deliveryDetails, users }) => {
   };
 
   const getTime = (city) => {
-  
+
     return businessDetails?.cities?.[city]?.time || null;
   };
 
@@ -103,13 +103,13 @@ const DeliveryDetails = ({ businessDetails, deliveryDetails, users }) => {
       <View style={styles.leftContainer}>
         <View style={styles.iconsContainer}>
           <TouchableOpacity onPress={() => setPhoneModalVisible(true)}>
-            <Icon name="phone" size={24} color="#4caf50" style={styles.icon} /> 
+            <Icon name="phone" size={24} color="#4caf50" style={styles.icon} />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleNavigation}>
-            <MaterialIcon name="navigation" size={24} color="#2196f3" style={styles.icon} /> 
+            <MaterialIcon name="navigation" size={24} color="#2196f3" style={styles.icon} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setImageModalVisible(true)}>
-            <Icon name="picture-o" size={24} color="#f57c00" style={styles.icon} /> 
+            <Icon name="picture-o" size={24} color="#f57c00" style={styles.icon} />
           </TouchableOpacity>
         </View>
 
@@ -124,14 +124,21 @@ const DeliveryDetails = ({ businessDetails, deliveryDetails, users }) => {
           <Text style={styles.text}>{deliveryDetails.address}</Text>
           <Text style={styles.text}>{deliveryDetails.city}</Text>
           <Text style={styles.text}>
-          {typeof timeInTimezone === "string"
+            {typeof timeInTimezone === "string"
               ? `התקבל בשעה: ${timeInTimezone.substring(0, timeInTimezone.length - 3)}`
               : "No time"}
           </Text>
           {deliveryDetails.status ? (
             <Text style={styles.given}>נמסר</Text>
           ) : (
-            <Text style={styles.timeLeftText}>זמן שנותר: {timeLeft}</Text>
+            <Text
+              style={[
+                styles.timeLeftText,
+                timeLeft === "מאחר" && { color: "#FF0000" }, // ✅ Apply red color when late
+              ]}
+            >
+              זמן שנותר: {timeLeft}
+            </Text>
           )}
         </View>
       </View>
@@ -199,11 +206,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 10,
     elevation: 2,// Android shadow
-     // iOS shadow
-     shadowColor: '#000',
-     shadowOffset: { width: 0, height: 2 },
-     shadowOpacity: 0.2,
-     shadowRadius: 4,
+    // iOS shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   iconsContainer: { flexDirection: "row", alignItems: "center" },
   icon: { marginHorizontal: 10 },

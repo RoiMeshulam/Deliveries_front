@@ -20,41 +20,39 @@ export const signInWithEmail = async (email, password, setIsConnected, setUserIn
     console.log("🔑 Signing in user...");
     const userCredential = await auth().signInWithEmailAndPassword(email, password);
     const user = userCredential.user;
-    const idToken = await user.getIdToken(); // ✅ Get Firebase token
+    const idToken = await user.getIdToken(); 
 
     console.log("📡 Requesting FCM token...");
     const fcmToken = await requestUserPermission();
 
-    // ✅ Send login token + FCM token to backend
+    console.log("📡 Sending Login Request...");
+    console.log("➡️ Payload:", { token: idToken, fcmToken });
+
     const response = await axios.post(`${API_BASE_URL}/api/users/signin`, { 
       token: idToken, 
-      fcmToken: fcmToken || null  // ✅ Send `null` if FCM token is unavailable
+      fcmToken: fcmToken || null  
     });
+
+    console.log("✅ Backend Response:", response.data);
 
     const { token, uid, role, name } = response.data;
 
-    await AsyncStorage.setItem('token', idToken); // ✅ Store token locally
-
-    console.log(`✅ User logged in: ${name} (${role})`);
+    await AsyncStorage.setItem('token', idToken);
     setIsConnected(true);
     setUserInfo({ name, role, uid });
 
     showCustomAlert("התחברת בהצלחה", `ברוך הבא! ${name}`, "success");
 
-    // ✅ Ensure WebSocket is initialized before emitting events
     if (socket) {
       console.log("🔌 Registering FCM token with WebSocket...");
       registerFcmTokenWithSocket(uid, fcmToken, socket);
-    } else {
-      console.warn("⚠️ WebSocket not initialized, skipping FCM registration.");
     }
 
-    // ✅ Navigate **after** WebSocket registration
     navigation.replace(role === "admin" ? 'AdminDashboard' : 'UserDashboard');
 
   } catch (error) {
-    console.error("❌ Login Error:", error);
-    showCustomAlert('Login Error', error.message || 'Login failed.', "error");
+    console.error("❌ Login Error:", error.response?.data || error.message);
+    showCustomAlert('Login Error', error.response?.data?.message || error.message, "error");
   }
 };
 

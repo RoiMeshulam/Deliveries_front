@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Platform, Image } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Platform, Image, KeyboardAvoidingView } from 'react-native';
 import { GlobalStateContext } from '../contexts/GlobalStateContext';
 import CustomAlert from '../components/styleComponents/CustomAlert';
 import { signInWithEmail } from '../services/firebaseService'; // ✅ Import Firebase login function
@@ -18,6 +18,11 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "android" ? 0 : 40} 
+      style={{ flex: 1 }}
+    >
     <View style={styles.container}>
       {/* Image above the title */}
       <Image source={require('../../assets/deliveryGuy.png')} style={styles.image} />
@@ -59,6 +64,7 @@ export default function LoginScreen({ navigation }) {
         type={alertData.type}
       />
     </View>
+    </KeyboardAvoidingView>
   );
 }
 

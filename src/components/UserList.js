@@ -2,13 +2,14 @@ import React from "react";
 import { View, FlatList, Text, StyleSheet } from "react-native";
 import UserItem from "./UserItem";
 
+
 export default function UsersList({ users }) {
   return (
     <View>
       <Text style={styles.subtitle}>שליחים</Text>
       <FlatList
         data={users}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item, index) => index }
         renderItem={({ item }) => <UserItem user={item} />}
       />
     </View>

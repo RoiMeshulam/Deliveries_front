@@ -1,10 +1,11 @@
 // DisplayBusinessesList.js
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+// import { ScrollView } from 'react-native-gesture-handler';
 
 export default function DisplayBusinessesList({ businesses }) {
   return (
-    <View>
+    <ScrollView>
       <Text style={styles.subtitle}>עסקים</Text>
       <View style={styles.avatarContainer}>
         {businesses.map((business, index) => (
@@ -17,7 +18,7 @@ export default function DisplayBusinessesList({ businesses }) {
           </View>
         ))}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 

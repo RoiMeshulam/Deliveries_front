@@ -49,6 +49,7 @@ export default function AddUser({ modalVisible, setModalVisible, newUser, setNew
                 selectedValue={newUser.role}
                 onValueChange={(itemValue) => setNewUser({ ...newUser, role: itemValue })}
                 style={styles.picker}
+                
               >
                 {roles.map((r) => (
                   <Picker.Item key={r.value} label={r.label} value={r.value} />
@@ -148,10 +149,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#fff',
     marginBottom: 12,
+    
   },
   picker: {
     width: '100%',
     height: 50,
+    // flex: 0.2
+    
   },
   iosPicker: {
     width: '100%',
@@ -167,6 +171,7 @@ const styles = StyleSheet.create({
   pickerText: {
     fontSize: 16,
     color: '#444',
+    
   },
   modalButtons: {
     flexDirection: 'row',

@@ -4,10 +4,8 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { io } from "socket.io-client";
 
-
 // Define socket server URL using the env variables
-const SOCKET_SERVER_URL =  Platform.OS === 'android' ? 'http://10.0.2.2:8080' : 'http://localhost:8080';
-
+const SOCKET_SERVER_URL = Platform.OS === "android" ? "http://10.0.2.2:8080" : "http://localhost:8080";
 
 console.log(SOCKET_SERVER_URL);
 
@@ -28,21 +26,21 @@ export const GlobalStateProvider = ({ children }) => {
   // WebSocket connection
   useEffect(() => {
     if (!isConnected || !userInfo.uid) return;
-  
+
     console.log("🔌 Connecting to WebSocket...");
-  
+
     const newSocket = io(SOCKET_SERVER_URL, {
       transports: ["websocket"],
       reconnection: true,
       query: { userId: userInfo.uid },
     });
-  
+
     setSocket(newSocket);
-  
+
     newSocket.on("connect", () => {
       console.log("✅ WebSocket Connected:", newSocket.id);
     });
-  
+
     newSocket.on("disconnect", (reason) => {
       console.warn("❌ WebSocket Disconnected:", reason);
       if (reason === "transport close") {
@@ -52,14 +50,14 @@ export const GlobalStateProvider = ({ children }) => {
         }, 3000);
       }
     });
-  
+
     // 📦 Listen for delivery updates
     newSocket.on("updateDeliveries", (update) => {
       console.log("📡 Received WebSocket Update:", update);
-  
+
       setDeliveries((prevDeliveries) => {
         let updatedDeliveries = [...prevDeliveries];
-  
+
         if (update.type === "new") {
           console.log("➕ Adding new delivery:", update.data);
           updatedDeliveries = [...updatedDeliveries, update.data];
@@ -72,11 +70,24 @@ export const GlobalStateProvider = ({ children }) => {
           console.log("🗑️ Removing deleted delivery:", update.id);
           updatedDeliveries = updatedDeliveries.filter((delivery) => delivery.id !== update.id);
         }
-  
+
         return [...updatedDeliveries]; // Force React to update state
       });
     });
-  
+
+    // ✅ Listen for new users
+    newSocket.on("newUserCreated", (newUser) => {
+      console.log("👤 New user created:", newUser);
+      
+      setUsers((prevUsers) => {
+        // Prevent duplicates
+        if (!prevUsers.find((user) => user.id === newUser.id)) {
+          return [...prevUsers, newUser];
+        }
+        return prevUsers;
+      });
+    });
+
     return () => {
       console.log("🔌 Disconnecting WebSocket...");
       newSocket.disconnect();
@@ -124,11 +135,8 @@ export const GlobalStateProvider = ({ children }) => {
         id,
         ...details,
       }));
-      console.log("delivery array",deliveryArray);
+      console.log("delivery array", deliveryArray);
       setDeliveries(deliveryArray);
-      
-
-      
 
       // Filter myTasks based on userInfo.uid
       const filteredTasks = deliveryArray.filter(
@@ -144,14 +152,11 @@ export const GlobalStateProvider = ({ children }) => {
     }
   };
 
-
-
   useEffect(() => {
     if (isConnected && userInfo.uid) {
       fetchAllData();
     }
   }, [isConnected, userInfo.uid]);
-  
 
   return (
     <GlobalStateContext.Provider

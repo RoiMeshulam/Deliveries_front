@@ -10,7 +10,7 @@ export default function UserItem({ user }) {
       <View>
         <Text style={styles.userText}>{user.name}</Text>
         <Text style={styles.roleText}>
-          {user.role === "Admin" ? "מנהל" : "שליח"}
+          {user.role === "admin" ? "מנהל" : "שליח"}
         </Text>
       </View>
     </View>
